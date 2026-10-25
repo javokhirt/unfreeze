@@ -4,12 +4,12 @@
 #include <WiFiUdp.h>
 #include <math.h>
 
-// ================= settings =================
+
 const char* WIFI_SSID = "iPhone17 max";
 const char* WIFI_PASS = "00000000";
-const char* LAPTOP_IP = "172.20.10.12";            // leave empty to broad cast
-const uint16_t EVENT_PORT = 4210;      // ankle -> laptop
-const uint16_t CMD_PORT   = 4211;      // laptop -> ankle
+const char* LAPTOP_IP = "172.20.10.12";           
+const uint16_t EVENT_PORT = 4210;     
+const uint16_t CMD_PORT   = 4211;      
 
 // Pins (ESP32-S3-DevKitC-1)
 const int MOTOR   = 4;
@@ -20,16 +20,16 @@ const int SDA_PIN = 8;
 const int SCL_PIN = 9;
 const int LED2    = 10;                // set to -1 if both LEDs share GPIO6
 
-// Detection thresholds (tune live with serial commands)
-float FI_ON    = 2.0f;                 // freeze index needed to start
-float FI_OFF   = 1.0f;                 // freeze index below this ends it
-float POWER_TH = 0.10f;                // minimum movement power (filters standing still)
+
+float FI_ON    = 2.0f;                
+float FI_OFF   = 1.0f;                 
+float POWER_TH = 0.10f;              
 const uint32_t MAX_FREEZE_MS = 20000;
 
 // Cue
 enum { CUE_BEAT = 0, CUE_VIBE = 1, CUE_VOICE = 2 };
 int cueMode = CUE_BEAT;
-const uint32_t BEAT_PERIOD = 545;      // 110 bpm
+const uint32_t BEAT_PERIOD = 545;    
 const uint32_t BEAT_ON_MS  = 80;
 const uint32_t VIBE_ON_MS  = 150;
 const int BUZZ_CH   = 0;
@@ -38,13 +38,13 @@ const int DOSE_FREQ = 800;
 
 // Sampling and spectrum
 const uint8_t  MPU       = 0x68;
-const uint32_t PERIOD_US = 15625;      // 64 Hz, matches Daphnet
-const int N   = 256;                   // 4 s window, 0.25 Hz per bin
+const uint32_t PERIOD_US = 15625;      
+const int N   = 256;                  
 const int HOP = 32;                    // new result every 0.5 s
 const int LOCO_LO = 2,  LOCO_HI = 11;  // 0.5 to 2.75 Hz  (walking)
 const int FRZ_LO  = 12, FRZ_HI  = 32;  // 3.0 to 8.0 Hz   (freezing)
 
-// ================= state =================
+
 WiFiUDP udp;
 bool wifiUp = false;
 uint32_t lastWifiCheck = 0;
@@ -70,7 +70,7 @@ uint32_t blipUntil = 0;
 
 String serialLine;
 
-// ================= output helpers =================
+
 void ledsSet(bool on) {
   digitalWrite(LED1, on ? HIGH : LOW);
   if (LED2 >= 0) digitalWrite(LED2, on ? HIGH : LOW);
@@ -98,7 +98,7 @@ void sendConfig() {
   sendEvent(b);
 }
 
-// ================= cue =================
+
 void beatPulse(uint32_t now) {
   lastBeat = now;
   beatOn = true;
@@ -137,7 +137,7 @@ void cueUpdate(uint32_t now) {
   if (now - lastBeat >= BEAT_PERIOD) beatPulse(now);
 }
 
-// ================= freeze episodes =================
+
 void startFreeze() {
   freezing = true;
   freezeStart = millis();
@@ -174,7 +174,7 @@ void detect(float fi, float pw) {
   }
 }
 
-// ================= IMU =================
+
 void mpuWrite(uint8_t reg, uint8_t val) {
   Wire.beginTransmission(MPU);
   Wire.write(reg);
@@ -203,7 +203,7 @@ bool readAccelMag(float& g) {
   return true;
 }
 
-// ================= spectrum =================
+
 void computeBands(float& fi, float& pw) {
   float mean = 0;
   for (int i = 0; i < N; i++) {
@@ -230,7 +230,7 @@ void computeBands(float& fi, float& pw) {
   fi = pf / (pl + 1e-6f);
 }
 
-// ================= inputs =================
+
 void handleCommand(String c) {
   c.trim();
   if (c.length() == 0) return;
@@ -318,7 +318,7 @@ void wifiUpdate(uint32_t now) {
   }
 }
 
-// ================= main =================
+
 void setup() {
   Serial.begin(115200);
   delay(300);
