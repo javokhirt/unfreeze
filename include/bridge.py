@@ -11,6 +11,7 @@ import csv
 import json
 import os
 import random
+import select
 import socket
 import subprocess
 import sys
@@ -57,6 +58,17 @@ class SerialLink:
 
     def send(self, text):
         self.ser.write((text + "\n").encode())
+
+
+def typed_command():
+    """Return a line typed into the terminal, or None."""
+    if not sys.stdin.isatty():
+        return None
+    ready, _, _ = select.select([sys.stdin], [], [], 0)
+    if not ready:
+        return None
+    line = sys.stdin.readline().strip()
+    return line or None
 
 
 def load_state():
@@ -108,7 +120,14 @@ def main():
     freeze_cue = None
     last_voice = 0.0
 
+    print("type: f = force freeze, s = stop, cue 0|1|2, fion X, pw X")
+
     while True:
+        cmd = typed_command()
+        if cmd:
+            link.send(cmd)
+            print(f"sent: {cmd}")
+
         line = link.recv()
         now = time.time()
 
